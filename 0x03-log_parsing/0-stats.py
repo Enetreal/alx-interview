@@ -11,6 +11,7 @@ status_codes = {'200': 0, '301': 0, '400': 0, '401': 0,
 
 def print_stats():
     """Prints the accumulated metrics."""
+    global total_size, status_codes
     print('File size: {}'.format(total_size))
     for key in sorted(status_codes.keys()):
         if status_codes[key] > 0:
