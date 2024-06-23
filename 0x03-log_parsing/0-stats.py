@@ -19,7 +19,7 @@ def print_stats():
 try:
     for line in sys.stdin:
         parts = line.split()
-        if len(parts) >= 7:
+        if len(parts) > 6:
             try:
                 # Extract the status code and file size
                 status_code = parts[-2]
