@@ -2,54 +2,31 @@
 """A script that reads stdin line by line and computes metrics."""
 
 import sys
+from collections import defaultdict
 
-# Initialize variables
-total_size = 0
-counter = 0
-status_codes = {'200': 0, '301': 0, '400': 0, '401': 0,
-                '403': 0, '404': 0, '405': 0, '500': 0}
-
-def print_stats():
-    """Prints the accumulated metrics."""
-    global total_size, status_codes
-    print('File size: {}'.format(total_size))
-    for key in sorted(status_codes.keys()):
-        if status_codes[key] > 0:
-            print('{}: {}'.format(key, status_codes[key]))
+total_file_size = 0
+status_codes = defaultdict(int)
 
 try:
-    for line in sys.stdin:
-        parts = line.split()
-        if len(parts) > 6:
-            try:
-                # Extract the status code and file size
-                status_code = parts[-2]
-                file_size = int(parts[-1])
+    for i, line in enumerate(sys.stdin, 1):
+        try:
+            ip_address, date, request, status_code, file_size = line.strip().split(" - ", 1)[0].split(" - ")
+            status_code = int(status_code.split(" ")[1])
+            file_size = int(file_size)
+            status_codes[status_code] += 1
+            total_file_size += file_size
+        except (ValueError, IndexError):
+            continue
 
-                # Update total file size
-                total_size += file_size
-
-                # Update status code count
-                if status_code in status_codes:
-                    status_codes[status_code] += 1
-
-                # Increment line counter
-                counter += 1
-
-                # Print stats after every 10 lines
-                if counter == 10:
-                    print_stats()
-                    counter = 0
-
-            except ValueError:
-                # Ignore lines with invalid file size
-                pass
+        if i % 10 == 0:
+            print(f"File size: {total_file_size}")
+            for code in sorted(status_codes):
+                if status_codes[code] > 0:
+                    print(f"{code}: {status_codes[code]}")
+            print()
 
 except KeyboardInterrupt:
-    # Handle the keyboard interrupt and print stats
-    print_stats()
-    raise
-
-finally:
-    # Ensure stats are printed when the program ends
-    print_stats()
+    print(f"File size: {total_file_size}")
+    for code in sorted(status_codes):
+        if status_codes[code] > 0:
+            print(f"{code}: {status_codes[code]}")
