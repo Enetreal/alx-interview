@@ -3,6 +3,12 @@
 
 import sys
 
+def print_stats(sum_file_size, status_code):
+    """Prints the accumulated metrics"""
+    print('File size: {:d}'.format(sum_file_size))
+    for key in sorted(status_code.keys()):
+        if status_code[key] != 0:
+            print('{}: {}'.format(key, status_code[key]))
 
 i = 0
 sum_file_size = 0
@@ -17,28 +23,22 @@ status_code = {'200': 0,
 
 try:
     for line in sys.stdin:
-        args = line.split(' ')
-        if len(args) > 2:
+        args = line.split()
+        if len(args) > 6:
             status_line = args[-2]
             file_size = args[-1]
             if status_line in status_code:
                 status_code[status_line] += 1
-            sum_file_size += int(file_size)
+            try:
+                sum_file_size += int(file_size)
+            except ValueError:
+                pass
             i += 1
             if i == 10:
-                print('File size: {:d}'.format(sum_file_size))
-                sorted_keys = sorted(status_code.keys())
-                for key in sorted_keys:
-                    value = status_code[key]
-                    if value != 0:
-                        print('{}: {}'.format(key, value))
+                print_stats(sum_file_size, status_code)
                 i = 0
-except Exception:
-    pass
+except KeyboardInterrupt:
+    print_stats(sum_file_size, status_code)
+    raise
 finally:
-    print('File size: {:d}'.format(sum_file_size))
-    sorted_keys = sorted(status_code.keys())
-    for key in sorted_keys:
-        value = status_code[key]
-        if value != 0:
-            print('{}: {}'.format(key, value))
+    print_stats(sum_file_size, status_code)
