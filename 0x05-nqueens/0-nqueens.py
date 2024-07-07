@@ -1,44 +1,55 @@
 #!/usr/bin/python3
-""" N queens """
+"""
+N Queens Challenge
+"""
+
 import sys
 
 
-if len(sys.argv) > 2 or len(sys.argv) < 2:
-    print("Usage: nqueens N")
-    exit(1)
-
-if not sys.argv[1].isdigit():
-    print("N must be a number")
-    exit(1)
-
-if int(sys.argv[1]) < 4:
-    print("N must be at least 4")
-    exit(1)
-
-n = int(sys.argv[1])
+def is_safe(row, col, placed_queens):
+    """Check if placing a queen at (row, col) is safe"""
+    for r, c in placed_queens:
+        if c == col or r - c == row - col or r + c == row + col:
+            return False
+    return True
 
 
-def queens(n, i=0, a=[], b=[], c=[]):
-    """ find possible positions """
-    if i < n:
-        for j in range(n):
-            if j not in a and i + j not in b and i - j not in c:
-                yield from queens(n, i + 1, a + [j], b + [i + j], c + [i - j])
-    else:
-        yield a
+def solve_nqueens(n):
+    """Solve the N Queens problem and return all solutions"""
+    solutions = []
+    placed_queens = []
+
+    def backtrack(row):
+        """Backtracking function to place queens recursively"""
+        if row == n:
+            solutions.append(placed_queens[:])
+            return
+        for col in range(n):
+            if is_safe(row, col, placed_queens):
+                placed_queens.append((row, col))
+                backtrack(row + 1)
+                placed_queens.pop()
+
+    backtrack(0)
+    return solutions
 
 
-def solve(n):
-    """ solve """
-    k = []
-    i = 0
-    for solution in queens(n, 0):
-        for s in solution:
-            k.append([i, s])
-            i += 1
-        print(k)
-        k = []
-        i = 0
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("Usage: nqueens.py N")
+        sys.exit(1)
 
+    try:
+        n = int(sys.argv[1])
+    except ValueError:
+        print('N must be a number')
+        sys.exit(1)
 
-solve(n)
+    if n < 4:
+        print('N must be at least 4')
+        sys.exit(1)
+
+    solutions = solve_nqueens(n)
+
+    for solution in solutions:
+        print(solution)
