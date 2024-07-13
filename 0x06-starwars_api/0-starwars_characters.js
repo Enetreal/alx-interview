@@ -18,6 +18,12 @@ request(url, async (err, response, body) => {
 
   try {
     const movie = JSON.parse(body);
+    
+    if (!movie || !movie.title) {
+      console.error('Movie not found for id:', movieId);
+      return;
+    }
+
     for (const characterUrl of movie.characters) {
       await new Promise((resolve, reject) => {
         request(characterUrl, (err, response, body) => {
@@ -25,13 +31,18 @@ request(url, async (err, response, body) => {
             reject(err);
             return;
           }
-          const character = JSON.parse(body);
-          console.log(character.name);
-          resolve();
+          try {
+            const character = JSON.parse(body);
+            console.log(character.name);
+            resolve();
+          } catch (error) {
+            console.error('Error parsing character data:', error);
+            reject(error);
+          }
         });
       });
     }
   } catch (error) {
-    console.error('Error parsing movie data or fetching character:', error);
+    console.error('Error parsing movie data:', error);
   }
 });
