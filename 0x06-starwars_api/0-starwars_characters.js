@@ -1,48 +1,53 @@
 #!/usr/bin/node
 
 const request = require('request');
+
 const movieId = process.argv[2];
+const filmEndPoint = 'https://swapi-api.hbtn.io/api/films/' + movieId;
+let people = [];
+const names = [];
 
-if (!movieId) {
-  console.error('Usage: ./script.js <movieId>');
-  process.exit(1);
-}
-
-const url = `https://swapi-api.alx-tools.com/api/films/${movieId}`;
-
-request(url, async (err, response, body) => {
-  if (err) {
-    console.error('Error fetching movie data:', err);
-    return;
-  }
-
-  try {
-    const movie = JSON.parse(body);
-
-    if (!movie || !movie.title) {
-      console.error('Movie not found for id:', movieId);
-      return;
+const requestCharacters = async () => {
+  await new Promise(resolve => request(filmEndPoint, (err, res, body) => {
+    if (err || res.statusCode !== 200) {
+      console.error('Error: ', err, '| StatusCode: ', res.statusCode);
+    } else {
+      const jsonBody = JSON.parse(body);
+      people = jsonBody.characters;
+      resolve();
     }
+  }));
+};
 
-    for (const characterUrl of movie.characters) {
-      try {
-        const characterResponse = await new Promise((resolve, reject) => {
-          request(characterUrl, (err, response, body) => {
-            if (err) {
-              reject(err);
-            } else {
-              resolve(body);
-            }
-          });
-        });
-
-        const character = JSON.parse(characterResponse);
-        console.log(character.name);
-      } catch (error) {
-        console.error('Error fetching or parsing character data:', error);
-      }
+const requestNames = async () => {
+  if (people.length > 0) {
+    for (const p of people) {
+      await new Promise(resolve => request(p, (err, res, body) => {
+        if (err || res.statusCode !== 200) {
+          console.error('Error: ', err, '| StatusCode: ', res.statusCode);
+        } else {
+          const jsonBody = JSON.parse(body);
+          names.push(jsonBody.name);
+          resolve();
+        }
+      }));
     }
-  } catch (error) {
-    console.error('Error parsing movie data:', error);
+  } else {
+    console.error('Error: Got no Characters for some reason');
   }
-});
+};
+
+const getCharNames = async () => {
+  await requestCharacters();
+  await requestNames();
+
+  for (const n of names) {
+    if (n === names[names.length - 1]) {
+      process.stdout.write(n);
+    } else {
+      process.stdout.write(n + '\n');
+    }
+  }
+};
+
+getCharNames();
