@@ -1,7 +1,12 @@
+#!/usr/bin/python3
+"""
+Prime Game
+"""
+
+
 def primeNumbers(n):
-    """
-    Return list of prime numbers between 1 and n inclusive
-    Args:
+    """Return list of prime numbers between 1 and n inclusive
+       Args:
         n (int): upper boundary of range. lower boundary is always 1
     """
     primeNos = []
