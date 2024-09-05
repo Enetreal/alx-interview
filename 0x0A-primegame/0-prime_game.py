@@ -3,58 +3,42 @@
 Prime Game
 """
 
-def generate_primes(limit):
-    """Generate a list of prime numbers up to a given limit.
-    
-    Args:
-        limit (int): The upper boundary of the range (inclusive).
-    
-    Returns:
-        List[int]: A list of prime numbers up to the limit.
-    """
-    if limit < 2:
-        return []
-    
-    sieve = [True] * (limit + 1)
-    sieve[0] = sieve[1] = False  # 0 and 1 are not prime numbers
-    primes = []
-    
-    for num in range(2, limit + 1):
-        if sieve[num]:
-            primes.append(num)
-            for multiple in range(num * num, limit + 1, num):
-                sieve[multiple] = False
-    
-    return primes
 
-def is_winner(num_rounds, rounds):
+def primeNumbers(n):
+    """Return list of prime numbers between 1 and n inclusive
+       Args:
+        n (int): upper boundary of range. lower boundary is always 1
     """
-    Determines the winner of the Prime Game.
-    
+    primeNos = []
+    filtered = [True] * (n + 1)
+    for prime in range(2, n + 1):
+        if (filtered[prime]):
+            primeNos.append(prime)
+            for i in range(prime, n + 1, prime):
+                filtered[i] = False
+    return primeNos
+
+
+def isWinner(x, nums):
+    """
+    Determines winner of Prime Game
     Args:
-        num_rounds (int): Number of rounds in the game.
-        rounds (List[int]): A list of upper limits for each round.
-    
-    Returns:
-        str: The name of the winner ('Maria' or 'Ben'), or None if no winner.
+        x (int): no. of rounds of game
+        nums (int): upper limit of range for each round
+    Return:
+        Name of winner (Maria or Ben) or None if winner cannot be found
     """
-    if not isinstance(num_rounds, int) or not isinstance(rounds, list):
+    if x is None or nums is None or x == 0 or nums == []:
         return None
-    if num_rounds <= 0 or any(not isinstance(n, int) for n in rounds):
-        return None
-    
-    maria_score = 0
-    ben_score = 0
-    
-    for upper_limit in rounds:
-        primes = generate_primes(upper_limit)
-        if len(primes) % 2 == 0:
-            ben_score += 1
+    Maria = Ben = 0
+    for i in range(x):
+        primeNos = primeNumbers(nums[i])
+        if len(primeNos) % 2 == 0:
+            Ben += 1
         else:
-            maria_score += 1
-    
-    if maria_score > ben_score:
+            Maria += 1
+    if Maria > Ben:
         return 'Maria'
-    elif ben_score > maria_score:
+    elif Ben > Maria:
         return 'Ben'
     return None
